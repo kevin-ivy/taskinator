@@ -275,6 +275,51 @@ var saveTasks = function() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 };
 
+var loadTasks = function() {
+    //Get task items from local storage
+    tasks = localStorage.getItem('tasks');
+    //check for null local storage, if so, assign empty array to tasks
+    if (!tasks) {
+        tasks = [];
+        return false;
+    }
+    // Convert tasks back into array of objects
+    tasks = JSON.parse(tasks);
+    //Iterate through tasks array and create elements
+    for (i = 0; i < tasks.length; i++) {
+        var listItemEl = document.createElement('li');
+
+        listItemEl.className = 'task-item';
+        listItemEl.setAttribute('data-task-id', tasks[i].id);
+        listItemEl.setAttribute('draggable', 'true');
+        
+        var taskInfoEl = document.createElement('div');
+        taskInfoEl.className = 'task-info';
+        taskInfoEl.innerHTML = "<h3 class='task-name'>" + tasks[i].name + "</h3><span class='task-type'>" + tasks[i].type + "</span>";
+
+        listItemEl.appendChild(taskInfoEl);
+
+        var taskActionsEl = createTaskActions(tasks[i].id);
+
+        listItemEl.appendChild(taskActionsEl);
+        
+        if (tasks[i].status === 'to do') {
+            listItemEl.querySelector("select[name='status-change']").selectedIndex = 0;
+            tasksToDoEl.appendChild(listItemEl);
+        }
+        else if (tasks[i].status === 'in progress') {
+            listItemEl.querySelector("select[name='status-change']").selectedIndex = 1;
+            tasksInProgressEl.appendChild(listItemEl);
+        }
+        else if (tasks[i].status === 'completed') {
+            listItemEl.querySelector("select[name='status-change']").selectedIndex = 2;
+            tasksCompletedEl.appendChild(listItemEl);
+        }
+        taskIdCounter++;
+    }
+
+};
+
 //Handle Submit Pushes
 formEl.addEventListener('submit', taskFormHandler);
 //Handle Edit or Delete
@@ -289,3 +334,5 @@ pageContentEl.addEventListener('dragover', dropZoneDragHandler);
 pageContentEl.addEventListener('drop', dropTaskHandler);
 // define drop leave handling
 pageContentEl.addEventListener('dragleave', dragLeaveHandler);
+
+loadTasks();
