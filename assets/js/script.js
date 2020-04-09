@@ -60,7 +60,18 @@ var createTaskEl = function(taskDataObj) {
 
     //add entire list  item to list
     listItemEl.appendChild(taskActionsEl);
-    tasksToDoEl.appendChild(listItemEl);
+    if (taskDataObj.status === 'to do') {
+        listItemEl.querySelector("select[name='status-change']").selectedIndex = 0;
+        tasksToDoEl.appendChild(listItemEl);
+    }
+    else if (taskDataObj.status === 'in progress') {
+        listItemEl.querySelector("select[name='status-change']").selectedIndex = 1;
+        tasksInProgressEl.appendChild(listItemEl);
+    }
+    else if (taskDataObj.status === 'completed') {
+        listItemEl.querySelector("select[name='status-change']").selectedIndex = 2;
+        tasksCompletedEl.appendChild(listItemEl);
+    }
 
     taskDataObj.id = taskIdCounter;
     tasks.push(taskDataObj);
@@ -277,48 +288,22 @@ var saveTasks = function() {
 
 var loadTasks = function() {
     //Get task items from local storage
-    tasks = localStorage.getItem('tasks');
+     var savedTasks = localStorage.getItem('tasks');
     //check for null local storage, if so, assign empty array to tasks
-    if (!tasks) {
-        tasks = [];
+    if (!savedTasks) {
         return false;
     }
+
     // Convert tasks back into array of objects
-    tasks = JSON.parse(tasks);
-    //Iterate through tasks array and create elements
-    for (i = 0; i < tasks.length; i++) {
-        var listItemEl = document.createElement('li');
+    savedTasks = JSON.parse(savedTasks);
 
-        listItemEl.className = 'task-item';
-        listItemEl.setAttribute('data-task-id', tasks[i].id);
-        listItemEl.setAttribute('draggable', 'true');
-        
-        var taskInfoEl = document.createElement('div');
-        taskInfoEl.className = 'task-info';
-        taskInfoEl.innerHTML = "<h3 class='task-name'>" + tasks[i].name + "</h3><span class='task-type'>" + tasks[i].type + "</span>";
-
-        listItemEl.appendChild(taskInfoEl);
-
-        var taskActionsEl = createTaskActions(tasks[i].id);
-
-        listItemEl.appendChild(taskActionsEl);
-        
-        if (tasks[i].status === 'to do') {
-            listItemEl.querySelector("select[name='status-change']").selectedIndex = 0;
-            tasksToDoEl.appendChild(listItemEl);
-        }
-        else if (tasks[i].status === 'in progress') {
-            listItemEl.querySelector("select[name='status-change']").selectedIndex = 1;
-            tasksInProgressEl.appendChild(listItemEl);
-        }
-        else if (tasks[i].status === 'completed') {
-            listItemEl.querySelector("select[name='status-change']").selectedIndex = 2;
-            tasksCompletedEl.appendChild(listItemEl);
-        }
-        taskIdCounter++;
+    for (var i = 0; i < savedTasks.length; i++) {
+    //pass each task object into the createTaskEl() function
+    createTaskEl(savedTasks[i]);
     }
-
 };
+
+loadTasks();
 
 //Handle Submit Pushes
 formEl.addEventListener('submit', taskFormHandler);
@@ -335,4 +320,5 @@ pageContentEl.addEventListener('drop', dropTaskHandler);
 // define drop leave handling
 pageContentEl.addEventListener('dragleave', dragLeaveHandler);
 
-loadTasks();
+
+
